@@ -22,7 +22,8 @@ class Div extends React.PureComponent {
 }
 
 const BuggySideEffect = withSideEffect(
-  (propsList) => { return undefined; },
+  (propsList) => { return propsList[propsList.length - 1]; },
+  // return-value may be undefined when .length === 0
   ({ violation }) => {}
   // "TypeError: Cannot destructure property `violation` of 'undefined' or 'null'."
 )(Div);
@@ -35,7 +36,11 @@ describe('Impossible to catch errors on componentWillUnmount', () => {
   });
 
   it('Error through side effect', () => {
-    const wrapper = mount(<BuggySideEffect/>);
+    const wrapper = mount(
+      <BuggySideEffect>
+        <BuggySideEffect/>
+      </BuggySideEffect>
+    );
 
     expect(() => wrapper.unmount()).toThrow();
   });
